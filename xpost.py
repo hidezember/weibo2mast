@@ -85,7 +85,7 @@ If RECURSIVE is True, also include url's from original post."""
     return url_list
 
 
-def upload_media(url_list, max_attatchment):
+def upload_media(url_list, max_attatchment,mast):
     """Upload media in URL_LIST.
 URL_LIST should be a list of MEDIA_URL. Return (TOOT_LIST, TOO_LARGE,
 TOO_MANY). TOOT_LIST is a list of TOOT_DICT.
@@ -109,7 +109,6 @@ TOO_MANY). TOOT_LIST is a list of TOOT_DICT.
                 media_too_large = True
                 logger.warning(f'Problem uploading media, type: {mime}, url: {url}, error: {err}')
     return (media_list, media_too_large, media_too_many)
-
 
 def cross_post(post, mast_dict, config, db, fallback_mast=None):
     """Cross-post POST to mastodon.
@@ -138,12 +137,12 @@ cannot find a Mastodon instance from dict for the weibo author.
     media_list = None
     media_too_large = False
     media_too_many = False
-    if not external_media:
-        media_list, media_too_large, media_too_many = \
-            upload_media(url_list, max_attatchment)
-
     # Come up with a Mastodon instance for tooting.
     mast = mast_dict.get(user_id)
+    if not external_media:
+        media_list, media_too_large, media_too_many = \
+            upload_media(url_list, max_attatchment, mast)
+
     if mast == None:
         if fallback_mast != None:
             mast = fallback_mast
@@ -221,7 +220,7 @@ cannot find a Mastodon instance from dict for the weibo author.
                             media_ids=media_list)
     post_record_list.append(make_post_record(post, toot))
     return post_record_list
-    
+
 
 def delete_all_toots(mast):
     """Delete all toots."""
@@ -236,7 +235,7 @@ def delete_all_toots(mast):
                 print('ok')
         time.sleep(30 * 60)
 
-                
+
 def delete_toot(toot_id, mast):
     """Delete toot with TOOT_ID."""
     try:
